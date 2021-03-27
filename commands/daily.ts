@@ -59,10 +59,12 @@ module.exports = {
         }
         //Check status 
         else if(commandName === 'status'){
+            const quote = generateQuote();
+
             const embed = new MessageEmbed()
                 .setColor('#FC651F')
                 .setTitle('Daily Status')
-                .setThumbnail(generateQuote())
+                .setThumbnail(quote)
                 .setDescription(`Daily massages are ${config.get('sendScheduledMessages') ? 'activated' : 'dissabled'}`)
                 .addFields(
                     { name: 'Time for daily messages:', value: `${config.get('dailyTime')}:00 CET` },
