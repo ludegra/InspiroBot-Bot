@@ -1,5 +1,6 @@
 import { Message, MessageEmbed } from "discord.js";
 import { serverConfig } from "../database";
+import { generateQuote } from "./generate";
 
 module.exports = {
     name: 'daily',
@@ -61,6 +62,14 @@ module.exports = {
             const embed = new MessageEmbed()
                 .setColor('#FC651F')
                 .setTitle('Daily Status')
+                .setThumbnail(generateQuote())
+                .setDescription(`Daily massages are ${config.get('sendScheduledMessages') ? 'activated' : 'dissabled'}`)
+                .addFields(
+                    { name: 'Time for daily messages:', value: `${config.get('dailyTime')}:00 CET` },
+                    {name: 'Channel for daily messages:', value: `<#${config.get('mainTextChannelId')}>`, inline: true}
+                );
+            
+            message.channel.send(embed);
         }
         //Shows an embed with all main args for !Daily
         else if(commandName === 'help'){
