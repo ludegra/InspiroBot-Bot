@@ -1,11 +1,13 @@
 import { Message, MessageEmbed } from "discord.js";
 import { serverConfig } from "../database";
-import { generateQuote } from "./generate";
+
+const { inspiroBotAPI } = require("../config.json");
+const fetch = require('node-fetch');
 
 module.exports = {
     name: 'daily',
     description: 'Toggles daily quotes',
-    args: 'true/false',
+    args: 'type ',
     async execute(message: Message, args: string[]){
         const config = await serverConfig.findOne({ where: { id: message.guild.id } });
         const toggle = config.get('sendScheduledMessages') as Boolean;
@@ -59,27 +61,43 @@ module.exports = {
         }
         //Check status 
         else if(commandName === 'status'){
-            const quote = generateQuote();
+            fetch(inspiroBotAPI).then(res => res.text()).then(body => {
 
-            const embed = new MessageEmbed()
-                .setColor('#FC651F')
-                .setTitle('Daily Status')
-                .setThumbnail(quote)
-                .setDescription(`Daily massages are ${config.get('sendScheduledMessages') ? 'activated' : 'dissabled'}`)
-                .addFields(
-                    { name: 'Time for daily messages:', value: `${config.get('dailyTime')}:00 CET` },
-                    {name: 'Channel for daily messages:', value: `<#${config.get('mainTextChannelId')}>`, inline: true}
-                );
+                const embed = new MessageEmbed()
+                    .setColor('#FC651F')
+                    .setTitle('Daily Status')
+                    .setThumbnail(body)
+                    .setDescription(`Daily massages are ${config.get('sendScheduledMessages') ? 'activated' : 'dissabled'}`)
+                    .addFields(
+                        { name: '\u200B', value: '\u200B' },
+                        { name: 'Time', value: `${config.get('dailyTime')}:00 CET`, inline: true},
+                        {name: 'Channel', value: `<#${config.get('mainTextChannelId')}>`, inline: true}
+                    )
+                    .setFooter(message.author.tag, message.author.avatarURL())
+                    .setTimestamp();
             
-            message.channel.send(embed);
+                return message.channel.send(embed);
+            });
         }
         //Shows an embed with all main args for !Daily
         else if(commandName === 'help'){
-            const embed = new MessageEmbed()
-                .setColor('#FC651F')
-                .setTitle('List of arguments to use with \`!help\`')
+            fetch(inspiroBotAPI).then(res => res.text()).then(body => {
+                const embed = new MessageEmbed()
+                    .setColor('#FC651F')
+                    .setTitle(`List of arguments to use with: ${prefix}daily`)
+                    .addFields(
+                        { name: '\u200B', value: '\u200B' },
+                        { name: 'Toggle [true/false]', value: 'Toggle daily messages on and off', inline: true },
+                        { name: 'Channel [#channel]', value: 'Select which channel to recieve daily messages', inline: true },
+                        { name: 'Time [Whole hour]', value: 'Set which time to send daily messages', inline: true },
+                        { name: 'Status', value: 'See status of daily messages', inline: true }
+                    )
+                    .setThumbnail(body)
+                    .setFooter(message.author.tag, message.author.avatarURL())
+                    .setTimestamp()
 
             return message.channel.send(embed);
+            });
         }
     } 
 }
