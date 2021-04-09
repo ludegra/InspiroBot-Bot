@@ -32,6 +32,7 @@ module.exports = {
                 return message.channel.send(`Daily quotes is already set to: \`${toggle ? 'true' : 'false'}\``);
             } 
         }
+        
         //Setting channel for daily quotes. Args: Channel mention(<#id>)
         else if(commandName === 'channel'){
             if(!/^<#\d{18}>$/.test(args[0])) return message.channel.send(`${args[0]} is not a valid channel id`)
@@ -48,9 +49,10 @@ module.exports = {
                 return message.channel.send('The specified channel does not exist within the server');
             }
         }
+
         //Setting the time for daily quotes. Args: Hours in various formats
         else if(commandName === 'time'){
-            if(!/^(((0|1)\d)|(2[0-3]))((\.|:)00(\.00){0,1}){0,1}$/.test(args[0])){
+            if(!/^(((0|1){0,1}\d)|(2[0-3]))((\.|:)00(\.00){0,1}){0,1}$/.test(args[0])){
                 if(/^(((0|1)\d)|(2[0-3]))(:|\.)\d\d((:|\.)\d\d){0,1}$/.test(args[0])) return message.channel.send('The time has to be an whole hour');
                 
                 return message.channel.send(`${args[0]} is not a valid time`);
@@ -59,6 +61,7 @@ module.exports = {
             await serverConfig.update({ dailyTime: hour }, { where: { id: message.guild.id } });
             return message.channel.send(`Time for daily messages set to: \`${hour}:00.00\``)
         }
+
         //Check status 
         else if(commandName === 'status'){
             fetch(inspiroBotAPI).then(res => res.text()).then(body => {
@@ -79,6 +82,7 @@ module.exports = {
                 return message.channel.send(embed);
             });
         }
+        
         //Shows an embed with all main args for !Daily
         else if(commandName === 'help'){
             fetch(inspiroBotAPI).then(res => res.text()).then(body => {

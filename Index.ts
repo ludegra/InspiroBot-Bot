@@ -1,10 +1,12 @@
 import { Channel, Client, Collection, Guild, Message, MessageEmbed, TextChannel } from "discord.js";
 import { serverConfig, AddNewGuilds } from "./database";
+import { Generate } from "./commands/generate"
 
 const fs = require('fs');
 const fetch = require('node-fetch');
 const {token, inspiroBotAPI, botID} = require('./config.json');
 const Discord = require('discord.js');
+const generate = require('./commands/generate');
 
 const client = new Discord.Client();
 
@@ -25,12 +27,10 @@ let schedule = cron.schedule('0 * * * *', () => {
     const currentDate = new Date();
     const hour = currentDate.getHours();
 
-    console.log('Daily check');
-
     client.guilds.cache.forEach(async guild => {
-        const config = await serverConfig.findOne({where: { id: guild.id} });
+        const config = await serverConfig.findOne({where: { id: guild.id }});
         if(config.get('sendScheduledMessages') && config.get('dailyTime') === hour){
-            Generate(config.get('mainTextChannelId') as string, guild);
+            generate.generate(config.get('mainTextChannelId') as string, guild, client, "Quote of the day");
         }
     });
 }, {
@@ -74,16 +74,4 @@ client.on('message', async message => {
         message.channel.send('Oops, something went wrong')
     }
 })
-
-function Generate(channelId: string, guild: Guild){
-    fetch(inspiroBotAPI).then(res => res.text()).then(body => {
-        const embed: MessageEmbed = new Discord.MessageEmbed()
-            .setColor('#7DBBFA')
-            .setTitle('Quote of the day')
-            .setImage(body);
-        const channel = guild.channels.cache.get(channelId) as TextChannel;
-        channel.send(embed);
-    });
-}
-
 client.login(token);
